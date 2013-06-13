@@ -176,7 +176,7 @@ include_directories(${HPDF_INCLUDE_DIR})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-set(PRC_WRITER_NAME libpdal_plugin_writer_prc)
+set(PRC_WRITER_NAME pdal_plugin_writer_prc)
 
 set(PRC_HPP
   include/prc/PRC.hpp

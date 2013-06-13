@@ -2,10 +2,10 @@
 <Pipeline version="1.0">
   <Writer type="drivers.prc.writer">
     <Option name="pdf_filename">
-	    temp/out.pdf
+	    ./temp/out.pdf
     </Option>
     <Option name="prc_filename">
-	    temp/out.prc
+	    ./temp/out.prc
     </Option>
     <Option name="output_format">
       pdf
