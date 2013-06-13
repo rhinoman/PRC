@@ -26,6 +26,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/erase.hpp>
+//#include <boost/multi_array.hpp>
 
 #include <hpdf.h>
 #include <hpdf_u3d.h>
@@ -271,43 +272,73 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
 
     if (m_colorScale == COLOR_SCALE_AUTO)
     {
-	/*
-        double **points;
-        points = (double**) malloc(sizeof(double*));
-        {
-            points[0] = (double*) malloc(3*sizeof(double));
-        }
-	*/
+            double **p0, **p1, **p2, **p3, **p4, **p5, **p6, **p7, **p8;
+            p0 = (double**) malloc(data.getNumPoints()*sizeof(double*));
+			p1 = (double**) malloc(data.getNumPoints()*sizeof(double*));
+			p2 = (double**) malloc(data.getNumPoints()*sizeof(double*));
+			p3 = (double**) malloc(data.getNumPoints()*sizeof(double*));
+			p4 = (double**) malloc(data.getNumPoints()*sizeof(double*));
+			p5 = (double**) malloc(data.getNumPoints()*sizeof(double*));
+			p6 = (double**) malloc(data.getNumPoints()*sizeof(double*));
+			p7 = (double**) malloc(data.getNumPoints()*sizeof(double*));
+			p8 = (double**) malloc(data.getNumPoints()*sizeof(double*));
+            for (boost::uint32_t i = 0; i < data.getNumPoints(); ++i)
+            {
+                p0[i] = (double*) malloc(3*sizeof(double));
+				p1[i] = (double*) malloc(3*sizeof(double));
+				p2[i] = (double*) malloc(3*sizeof(double));
+				p3[i] = (double*) malloc(3*sizeof(double));
+				p4[i] = (double*) malloc(3*sizeof(double));
+				p5[i] = (double*) malloc(3*sizeof(double));
+				p6[i] = (double*) malloc(3*sizeof(double));
+				p7[i] = (double*) malloc(3*sizeof(double));
+				p8[i] = (double*) malloc(3*sizeof(double));
+            }
 
         double xd(0.0);
         double yd(0.0);
         double zd(0.0);
 
-        RGBAColour c0(255.0/255.0, 245.0/255.0, 235.0/255.0, 1.0);
-        RGBAColour c1(254.0/255.0, 230.0/255.0, 206.0/255.0, 1.0);
-        RGBAColour c2(253.0/255.0, 208.0/255.0, 162.0/255.0, 1.0);
-        RGBAColour c3(253.0/255.0, 174.0/255.0, 107.0/255.0, 1.0);
-        RGBAColour c4(253.0/255.0, 141.0/255.0,  60.0/255.0, 1.0);
-        RGBAColour c5(241.0/255.0, 105.0/255.0,  19.0/255.0, 1.0);
-        RGBAColour c6(217.0/255.0,  72.0/255.0,   1.0/255.0, 1.0);
-        RGBAColour c7(166.0/255.0,  54.0/255.0,   3.0/255.0, 1.0);
-        RGBAColour c8(127.0/255.0,  39.0/255.0,   4.0/255.0, 1.0);
+        RGBAColour c8(255.0/255.0, 245.0/255.0, 235.0/255.0);
+        RGBAColour c7(254.0/255.0, 230.0/255.0, 206.0/255.0);
+        RGBAColour c6(253.0/255.0, 208.0/255.0, 162.0/255.0);
+        RGBAColour c5(253.0/255.0, 174.0/255.0, 107.0/255.0);
+        RGBAColour c4(253.0/255.0, 141.0/255.0,  60.0/255.0);
+        RGBAColour c3(241.0/255.0, 105.0/255.0,  19.0/255.0);
+        RGBAColour c2(217.0/255.0,  72.0/255.0,   1.0/255.0);
+        RGBAColour c1(166.0/255.0,  54.0/255.0,   3.0/255.0);
+        RGBAColour c0(127.0/255.0,  39.0/255.0,   4.0/255.0);
 
         double range = m_bounds.getMaximum(2) - m_bounds.getMinimum(2);
         double step = range / 9;
-        double t0 = m_bounds.getMinimum(2) + 1 * step;
-        double t1 = m_bounds.getMinimum(2) + 2 * step;
-        double t2 = m_bounds.getMinimum(2) + 3 * step;
-        double t3 = m_bounds.getMinimum(2) + 4 * step;
-        double t4 = m_bounds.getMinimum(2) + 5 * step;
-        double t5 = m_bounds.getMinimum(2) + 6 * step;
-        double t6 = m_bounds.getMinimum(2) + 7 * step;
-        double t7 = m_bounds.getMinimum(2) + 8 * step;
+        double t0 = m_bounds.getMinimum(2) + 1 * step - cz;
+        double t1 = m_bounds.getMinimum(2) + 2 * step - cz;
+        double t2 = m_bounds.getMinimum(2) + 3 * step - cz;
+        double t3 = m_bounds.getMinimum(2) + 4 * step - cz;
+        double t4 = m_bounds.getMinimum(2) + 5 * step - cz;
+        double t5 = m_bounds.getMinimum(2) + 6 * step - cz;
+        double t6 = m_bounds.getMinimum(2) + 7 * step - cz;
+        double t7 = m_bounds.getMinimum(2) + 8 * step - cz;
 
         printf("z stats %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n", range, step, t0, t1, t2, t3, t4, t5, t6, t7);
 
-        std::vector<std::vector<PRCVector3d> > p;
-	p.reserve(9);
+        //std::vector<std::vector<std::vector<double> > > p;
+
+		int id0, id1, id2, id3, id4, id5, id6, id7, id8;
+		id0 = id1 = id2 = id3 = id4 = id5 = id6 = id7 = id8 = 0;
+        
+		//p.resize(9);
+		//for (int i = 0; i < 9; ++i)
+		//{
+		//	p[i].resize(data.getNumPoints());
+
+		//	for (int j = 0; j < data.getNumPoints(); ++j)
+		//	{
+		//		p[i][j].resize(3);
+		//	}
+		//}
+
+		//boost::multi_array<double, 3> p(boost::extents[9][data.getNumPoints()][3]);
 
         if (dimX.getByteSize() == 4 && dimX.getInterpretation() == pdal::dimension::Float)
         {
@@ -321,24 +352,71 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
                 yd = dimY.applyScaling<float>(y) - cy;
                 zd = dimZ.applyScaling<float>(z) - cz;
 
+				if (i % 1000 == 0) printf("%f %f %f\n", xd, yd, zd);
+
                 if (zd < t0)
-                    p[0].push_back(PRCVector3d(xd, yd, zd));
+				{
+                    p0[id0][0] = xd;
+					p0[id0][1] = yd;
+					p0[id0][2] = zd;
+					id0++;
+				}
                 else if (zd < t1)
-                    p[1].push_back(PRCVector3d(xd, yd, zd));
+				{
+                    p1[id1][0] = xd;
+					p1[id1][1] = yd;
+					p1[id1][2] = zd;
+					id1++;
+				}
                 else if (zd < t2)
-                    p[2].push_back(PRCVector3d(xd, yd, zd));
+				{
+                    p2[id2][0] = xd;
+					p2[id2][1] = yd;
+					p2[id2][2] = zd;
+					id2++;
+				}
                 else if (zd < t3)
-                    p[3].push_back(PRCVector3d(xd, yd, zd));
+				{
+                    p3[id3][0] = xd;
+					p3[id3][1] = yd;
+					p3[id3][2] = zd;
+					id3++;
+				}
                 else if (zd < t4)
-                    p[4].push_back(PRCVector3d(xd, yd, zd));
+				{
+                    p4[id4][0] = xd;
+					p4[id4][1] = yd;
+					p4[id4][2] = zd;
+					id4++;
+				}
                 else if (zd < t5)
-                    p[5].push_back(PRCVector3d(xd, yd, zd));
+				{
+                    p5[id5][0] = xd;
+					p5[id5][1] = yd;
+					p5[id5][2] = zd;
+					id5++;
+				}
                 else if (zd < t6)
-                    p[6].push_back(PRCVector3d(xd, yd, zd));
+				{
+                    p6[id6][0] = xd;
+					p6[id6][1] = yd;
+					p6[id6][2] = zd;
+					id6++;
+				}
                 else if (zd < t7)
-                    p[7].push_back(PRCVector3d(xd, yd, zd));
+				{
+                    p7[id7][0] = xd;
+					p7[id7][1] = yd;
+					p7[id7][2] = zd;
+					id7++;
+				}
                 else
-                    p[8].push_back(PRCVector3d(xd, yd, zd));
+				{
+                    p8[id8][0] = xd;
+					p8[id8][1] = yd;
+					p8[id8][2] = zd;
+					id8++;
+				}
 
                 /*
                         points[i][0] = xd;
@@ -356,90 +434,140 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
                 numPoints++;
             }
         }
-            else if (dimX.getByteSize() == 4 && dimX.getInterpretation() == pdal::dimension::SignedInteger)
+        else if (dimX.getByteSize() == 4 && dimX.getInterpretation() == pdal::dimension::SignedInteger)
+        {
+            for (boost::uint32_t i = 0; i < data.getNumPoints(); ++i)
             {
-                for (boost::uint32_t i = 0; i < data.getNumPoints(); ++i)
-                {
-                    boost::int32_t x = data.getField<boost::int32_t>(dimX, i);
-                    boost::int32_t y = data.getField<boost::int32_t>(dimY, i);
-                    boost::int32_t z = data.getField<boost::int32_t>(dimZ, i);
+                boost::int32_t x = data.getField<boost::int32_t>(dimX, i);
+                boost::int32_t y = data.getField<boost::int32_t>(dimY, i);
+                boost::int32_t z = data.getField<boost::int32_t>(dimZ, i);
 
-                    xd = dimX.applyScaling<boost::int32_t>(x) - cx;
-                    yd = dimY.applyScaling<boost::int32_t>(y) - cy;
-                    zd = dimZ.applyScaling<boost::int32_t>(z) - cz;
+                xd = dimX.applyScaling<boost::int32_t>(x) - cx;
+                yd = dimY.applyScaling<boost::int32_t>(y) - cy;
+                zd = dimZ.applyScaling<boost::int32_t>(z) - cz;
 
-		    /*
-                    if (i % 10000) printf("%f %f %f\n", xd, yd, zd);
+				if (i % 1000 == 0) printf("%f %f %f\n", xd, yd, zd);
 
-                    points[i][0] = xd;
-                    points[i][1] = yd;
-                    points[i][2] = zd;
+				/*
+                        points[i][0] = xd;
+                        points[i][1] = yd;
+                        points[i][2] = zd;
 
-                    double r = (dimZ.applyScaling<boost::int32_t>(z) - m_bounds.getMinimum(2)) / (m_bounds.getMaximum(2) - m_bounds.getMinimum(2));
-                    double g, b;
-                    g = b = 0.0f;
-                    if (i % 1000 == 0) printf("%f %f %f %f %f %f\n", xd, yd, zd, r, g, b);
+                        double r = (dimZ.applyScaling<boost::int32_t>(z) - m_bounds.getMinimum(2)) / (m_bounds.getMaximum(2) - m_bounds.getMinimum(2));
+                        double g, b;
+                        g = b = 0.0f;
+                        if (i % 1000 == 0) printf("%f %f %f %f %f %f\n", xd, yd, zd, r, g, b);
 
-                    m_prcFile.addPoints(1, const_cast<const double**>(points), RGBAColour(r,0.0,0.0,1.0), 5.0);
-		    */
+                        m_prcFile.addPoints(1, const_cast<const double**>(points), RGBAColour(r,0.0,0.0,1.0), 5.0);
+                */
+
                 if (zd < t0)
-                    p[0].push_back(PRCVector3d(xd, yd, zd));
+				{
+                    p0[id0][0] = xd;
+					p0[id0][1] = yd;
+					p0[id0][2] = zd;
+					id0++;
+				}
                 else if (zd < t1)
-                    p[1].push_back(PRCVector3d(xd, yd, zd));
+				{
+                    p1[id1][0] = xd;
+					p1[id1][1] = yd;
+					p1[id1][2] = zd;
+					id1++;
+				}
                 else if (zd < t2)
-                    p[2].push_back(PRCVector3d(xd, yd, zd));
+				{
+                    p2[id2][0] = xd;
+					p2[id2][1] = yd;
+					p2[id2][2] = zd;
+					id2++;
+				}
                 else if (zd < t3)
-                    p[3].push_back(PRCVector3d(xd, yd, zd));
+				{
+                    p3[id3][0] = xd;
+					p3[id3][1] = yd;
+					p3[id3][2] = zd;
+					id3++;
+				}
                 else if (zd < t4)
-                    p[4].push_back(PRCVector3d(xd, yd, zd));
+				{
+                    p4[id4][0] = xd;
+					p4[id4][1] = yd;
+					p4[id4][2] = zd;
+					id4++;
+				}
                 else if (zd < t5)
-                    p[5].push_back(PRCVector3d(xd, yd, zd));
+				{
+                    p5[id5][0] = xd;
+					p5[id5][1] = yd;
+					p5[id5][2] = zd;
+					id5++;
+				}
                 else if (zd < t6)
-                    p[6].push_back(PRCVector3d(xd, yd, zd));
+				{
+                    p6[id6][0] = xd;
+					p6[id6][1] = yd;
+					p6[id6][2] = zd;
+					id6++;
+				}
                 else if (zd < t7)
-                    p[7].push_back(PRCVector3d(xd, yd, zd));
+				{
+                    p7[id7][0] = xd;
+					p7[id7][1] = yd;
+					p7[id7][2] = zd;
+					id7++;
+				}
                 else
-                    p[8].push_back(PRCVector3d(xd, yd, zd));
+				{
+                    p8[id8][0] = xd;
+					p8[id8][1] = yd;
+					p8[id8][2] = zd;
+					id8++;
+				}
 
-                    numPoints++;
-                }
+                numPoints++;
             }
+        }
         else
         {
             std::cerr << "didn't detect a suitable dimension interpretation\n";
         }
 
-        for (int bos = 0; bos < 9; bos++)
-        {
-            double **points;
-            points = (double**) malloc(p[bos].size()*sizeof(double*));
-            for (boost::uint32_t i = 0; i < p[bos].size(); ++i)
-            {
-                points[i] = (double*) malloc(3*sizeof(double));
-            }
+		//boost::multi_array<double, 3>::array_view<2>::type view = p[ boost::indices[0][boost::multi_array_types::index_range()][boost::multi_array_types::index_range()] ];
+		
+		printf("%d %d %d %d %d %d %d %d %d\n", id0, id1, id2, id3, id4, id5, id6, id7, id8);
 
-            for (boost::uint32_t i = 0; i < p[bos].size(); ++i)
-            {
-                points[i][0] = xd;
-                points[i][1] = yd;
-                points[i][2] = zd;
-            }
+		m_prcFile.addPoints(id0, const_cast<const double**>(p0), c0, 1.0);
+		m_prcFile.addPoints(id1, const_cast<const double**>(p1), c1, 1.0);
+		m_prcFile.addPoints(id2, const_cast<const double**>(p2), c2, 1.0);
+		m_prcFile.addPoints(id3, const_cast<const double**>(p3), c3, 1.0);
+		m_prcFile.addPoints(id4, const_cast<const double**>(p4), c4, 1.0);
+		m_prcFile.addPoints(id5, const_cast<const double**>(p5), c5, 1.0);
+		m_prcFile.addPoints(id6, const_cast<const double**>(p6), c6, 1.0);
+		m_prcFile.addPoints(id7, const_cast<const double**>(p7), c7, 1.0);
+		m_prcFile.addPoints(id8, const_cast<const double**>(p8), c8, 1.0);
 
-            m_prcFile.addPoints(p[bos].size(), const_cast<const double**>(points), c0, 5.0);
-
-            for (boost::uint32_t i = 0; i < p[bos].size(); i++)
-            {
-                free(points[i]);
-            }
-            free(points);
-        }
-
-        /*
+		for (boost::uint32_t i = 0; i < data.getNumPoints(); ++i)
                 {
-                    free(points[0]);
+                    free(p0[i]);
+					free(p1[i]);
+					free(p2[i]);
+					free(p3[i]);
+					free(p4[i]);
+					free(p5[i]);
+					free(p6[i]);
+					free(p7[i]);
+					free(p8[i]);
                 }
-                free(points);
-            */
+                free(p0);
+				free(p1);
+				free(p2);
+				free(p3);
+				free(p4);
+				free(p5);
+				free(p6);
+				free(p7);
+				free(p8);
     }
     else
     {
