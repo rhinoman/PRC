@@ -15,7 +15,7 @@
     </Option>
       <Reader type="drivers.las.reader">
         <Option name="filename">
-          /Users/bchambers/data/libLAS_sample_data/Serpent Mound Model LAS Data.las
+          /Users/bchambers/data/libLAS_sample_data/MtStHelens.laz
         </Option>
       </Reader>
   </Writer>

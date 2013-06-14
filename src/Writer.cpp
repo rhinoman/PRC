@@ -68,16 +68,11 @@ Writer::Writer(Stage& prevStage, const Options& options)
     , m_prcFile(options.getOption("prc_filename").getValue<std::string>())
     , m_outputFormat(OUTPUT_FORMAT_PDF)
     , m_colorScale(COLOR_SCALE_NONE)
+    //, m_bounds(prevStage.getBounds())
 {
-    std::cout << options.getOption("prc_filename").getValue<std::string>() << std::endl;
+    //std::cout << options.getOption("prc_filename").getValue<std::string>() << std::endl;
 
-    m_bounds = prevStage.getBounds();
-    double zmin = m_bounds.getMinimum(2);
-    double zmax = m_bounds.getMaximum(2);
-    double cz = (zmax-zmin)/2+zmin;
-    HPDF_REAL cooz = static_cast<HPDF_REAL>(cz);
-
-    printf("cz: %f, min: %f, max: %f, cooz: %f\n", cz, zmin, zmax, cooz);
+    //m_bounds = prevStage.getBounds();
 
     return;
 }
@@ -213,6 +208,7 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
         HPDF_Page_SetHeight(page, height);
 
         std::string prcFilename = getOptions().getValueOrThrow<std::string>("prc_filename");
+	printf("%s\n", prcFilename.c_str());
         u3d = HPDF_LoadU3DFromFile(pdf, prcFilename.c_str());
         if (!u3d)
         {
@@ -259,6 +255,14 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
 boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
 {
     boost::uint32_t numPoints = 0;
+
+    m_bounds = data.getSpatialBounds();
+    double zmin = m_bounds.getMinimum(2);
+    double zmax = m_bounds.getMaximum(2);
+    double cz2 = (zmax-zmin)/2+zmin;
+    HPDF_REAL cooz = static_cast<HPDF_REAL>(cz2);
+
+    printf("cz: %f, min: %f, max: %f, cooz: %f\n", cz2, zmin, zmax, cooz);
 
     double cx = (m_bounds.getMaximum(0)-m_bounds.getMinimum(0))/2+m_bounds.getMinimum(0);
     double cy = (m_bounds.getMaximum(1)-m_bounds.getMinimum(1))/2+m_bounds.getMinimum(1);
@@ -309,16 +313,49 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
         RGBAColour c1(166.0/255.0,  54.0/255.0,   3.0/255.0);
         RGBAColour c0(127.0/255.0,  39.0/255.0,   4.0/255.0);
 
-        double range = m_bounds.getMaximum(2) - m_bounds.getMinimum(2);
-        double step = range / 9;
-        double t0 = m_bounds.getMinimum(2) + 1 * step - cz;
-        double t1 = m_bounds.getMinimum(2) + 2 * step - cz;
-        double t2 = m_bounds.getMinimum(2) + 3 * step - cz;
-        double t3 = m_bounds.getMinimum(2) + 4 * step - cz;
-        double t4 = m_bounds.getMinimum(2) + 5 * step - cz;
-        double t5 = m_bounds.getMinimum(2) + 6 * step - cz;
-        double t6 = m_bounds.getMinimum(2) + 7 * step - cz;
-        double t7 = m_bounds.getMinimum(2) + 8 * step - cz;
+	double range, step, t0, t1, t2, t3, t4, t5, t6, t7;
+
+        if (0)
+	{
+		range = std::sqrt(m_bounds.getMaximum(2)) - std::sqrt(m_bounds.getMinimum(2));
+		step = range / 9;
+        t0 = m_bounds.getMinimum(2) + step*step - cz;
+         t1 = m_bounds.getMinimum(2) + (2*step)*(2*step) - cz;
+         t2 = m_bounds.getMinimum(2) + (3*step)*(3*step) - cz;
+         t3 = m_bounds.getMinimum(2) + (4*step)*(4*step) - cz;
+         t4 = m_bounds.getMinimum(2) + (5*step)*(5*step) - cz;
+         t5 = m_bounds.getMinimum(2) + (6*step)*(6*step) - cz;
+         t6 = m_bounds.getMinimum(2) + (7*step)*(7*step) - cz;
+         t7 = m_bounds.getMinimum(2) + (8*step)*(8*step) - cz;
+	}
+	else if (1)
+	{
+         range = m_bounds.getMaximum(2) - m_bounds.getMinimum(2);
+	 double twoper = range * 0.02;
+	 std::cout << twoper << std::endl;
+	 step = (range - 2 * twoper) / 7;
+         t0 = m_bounds.getMinimum(2) + twoper - cz;
+         t1 = m_bounds.getMinimum(2) + twoper + 1 * step - cz;
+         t2 = m_bounds.getMinimum(2) + twoper + 2 * step - cz;
+         t3 = m_bounds.getMinimum(2) + twoper + 3 * step - cz;
+         t4 = m_bounds.getMinimum(2) + twoper + 4 * step - cz;
+         t5 = m_bounds.getMinimum(2) + twoper + 5 * step - cz;
+         t6 = m_bounds.getMinimum(2) + twoper + 6 * step - cz;
+         t7 = m_bounds.getMinimum(2) + twoper + 7 * step - cz;
+	}
+	else
+	{
+         range = m_bounds.getMaximum(2) - m_bounds.getMinimum(2);
+	 step = range / 9;
+         t0 = m_bounds.getMinimum(2) + 1 * step - cz;
+         t1 = m_bounds.getMinimum(2) + 2 * step - cz;
+         t2 = m_bounds.getMinimum(2) + 3 * step - cz;
+         t3 = m_bounds.getMinimum(2) + 4 * step - cz;
+         t4 = m_bounds.getMinimum(2) + 5 * step - cz;
+         t5 = m_bounds.getMinimum(2) + 6 * step - cz;
+         t6 = m_bounds.getMinimum(2) + 7 * step - cz;
+         t7 = m_bounds.getMinimum(2) + 8 * step - cz;
+	}
 
         printf("z stats %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n", range, step, t0, t1, t2, t3, t4, t5, t6, t7);
 
@@ -352,7 +389,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
                 yd = dimY.applyScaling<float>(y) - cy;
                 zd = dimZ.applyScaling<float>(z) - cz;
 
-				if (i % 1000 == 0) printf("%f %f %f\n", xd, yd, zd);
+		//		if (i % 1000 == 0) printf("%f %f %f\n", xd, yd, zd);
 
                 if (zd < t0)
 				{
@@ -446,7 +483,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
                 yd = dimY.applyScaling<boost::int32_t>(y) - cy;
                 zd = dimZ.applyScaling<boost::int32_t>(z) - cz;
 
-				if (i % 1000 == 0) printf("%f %f %f\n", xd, yd, zd);
+			//	if (i % 1000 == 0) printf("%f %f %f\n", xd, yd, zd);
 
 				/*
                         points[i][0] = xd;
