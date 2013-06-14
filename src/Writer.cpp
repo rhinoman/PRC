@@ -26,7 +26,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/erase.hpp>
-//#include <boost/multi_array.hpp>
 
 #include <hpdf.h>
 #include <hpdf_u3d.h>
@@ -68,12 +67,7 @@ Writer::Writer(Stage& prevStage, const Options& options)
     , m_prcFile(options.getOption("prc_filename").getValue<std::string>())
     , m_outputFormat(OUTPUT_FORMAT_PDF)
     , m_colorScale(COLOR_SCALE_NONE)
-    //, m_bounds(prevStage.getBounds())
 {
-    //std::cout << options.getOption("prc_filename").getValue<std::string>() << std::endl;
-
-    //m_bounds = prevStage.getBounds();
-
     return;
 }
 
@@ -313,7 +307,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
         RGBAColour  c1(0.0, 109.0/255.0,  44.0/255.0);
         RGBAColour  c0(0.0,  68.0/255.0,  27.0/255.0);
 
-//  RGBAColour          c8(255.0/255.0, 245.0/255.0, 235.0/255.0);
+// RGBAColour          c8(255.0/255.0, 245.0/255.0, 235.0/255.0);
 // RGBAColour          c7(254.0/255.0, 230.0/255.0, 206.0/255.0);
 // RGBAColour          c6(253.0/255.0, 208.0/255.0, 162.0/255.0);
 // RGBAColour          c5(253.0/255.0, 174.0/255.0, 107.0/255.0);
@@ -387,23 +381,8 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
         t7 -= cz;
         printf("z stats %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n", range, step, t0, t1, t2, t3, t4, t5, t6, t7);
 
-        //std::vector<std::vector<std::vector<double> > > p;
-
         int id0, id1, id2, id3, id4, id5, id6, id7, id8;
         id0 = id1 = id2 = id3 = id4 = id5 = id6 = id7 = id8 = 0;
-
-        //p.resize(9);
-        //for (int i = 0; i < 9; ++i)
-        //{
-        //  p[i].resize(data.getNumPoints());
-
-        //  for (int j = 0; j < data.getNumPoints(); ++j)
-        //  {
-        //      p[i][j].resize(3);
-        //  }
-        //}
-
-        //boost::multi_array<double, 3> p(boost::extents[9][data.getNumPoints()][3]);
 
         if (dimX.getByteSize() == 4 && dimX.getInterpretation() == pdal::dimension::Float)
         {
@@ -483,19 +462,6 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
                     id8++;
                 }
 
-                /*
-                        points[i][0] = xd;
-                        points[i][1] = yd;
-                        points[i][2] = zd;
-
-                        double r = (dimZ.applyScaling<float>(z) - m_bounds.getMinimum(2)) / (m_bounds.getMaximum(2) - m_bounds.getMinimum(2));
-                        double g, b;
-                        g = b = 0.0f;
-                        if (i % 1000 == 0) printf("%f %f %f %f %f %f\n", xd, yd, zd, r, g, b);
-
-                        m_prcFile.addPoints(1, const_cast<const double**>(points), RGBAColour(r,0.0,0.0,1.0), 5.0);
-                */
-
                 numPoints++;
             }
         }
@@ -512,19 +478,6 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
                 zd = dimZ.applyScaling<boost::int32_t>(z) - cz;
 
                 //  if (i % 1000 == 0) printf("%f %f %f\n", xd, yd, zd);
-
-                /*
-                        points[i][0] = xd;
-                        points[i][1] = yd;
-                        points[i][2] = zd;
-
-                        double r = (dimZ.applyScaling<boost::int32_t>(z) - m_bounds.getMinimum(2)) / (m_bounds.getMaximum(2) - m_bounds.getMinimum(2));
-                        double g, b;
-                        g = b = 0.0f;
-                        if (i % 1000 == 0) printf("%f %f %f %f %f %f\n", xd, yd, zd, r, g, b);
-
-                        m_prcFile.addPoints(1, const_cast<const double**>(points), RGBAColour(r,0.0,0.0,1.0), 5.0);
-                */
 
                 if (zd < t0)
                 {
@@ -597,8 +550,6 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
         {
             std::cerr << "didn't detect a suitable dimension interpretation\n";
         }
-
-        //boost::multi_array<double, 3>::array_view<2>::type view = p[ boost::indices[0][boost::multi_array_types::index_range()][boost::multi_array_types::index_range()] ];
 
         printf("%d %d %d %d %d %d %d %d %d\n", id0, id1, id2, id3, id4, id5, id6, id7, id8);
 
