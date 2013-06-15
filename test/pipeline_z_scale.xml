@@ -10,8 +10,11 @@
     <Option name="output_format">
       pdf
     </Option>
-    <Option name="color_scale">
-      auto
+    <Option name="color_scheme">
+      oranges
+    </Option>
+    <Option name="contrast_stretch">
+      linear
     </Option>
       <Reader type="drivers.las.reader">
         <Option name="filename">

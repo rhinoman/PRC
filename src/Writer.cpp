@@ -48,12 +48,18 @@ enum OUTPUT_FORMAT
     OUTPUT_FORMAT_PRC
 };
 
-enum COLOR_SCALE
+enum COLOR_SCHEME
 {
-    COLOR_SCALE_NONE,
-    COLOR_SCALE_AUTO
+    COLOR_SCHEME_SOLID,
+    COLOR_SCHEME_ORANGES,
+    COLOR_SCHEME_BLUE_GREEN
 };
 
+enum CONTRAST_STRETCH
+{
+    CONTRAST_STRETCH_LINEAR,
+    CONTRAST_STRETCH_SQRT
+};
 
 namespace pdal
 {
@@ -66,7 +72,8 @@ Writer::Writer(Stage& prevStage, const Options& options)
     : pdal::Writer(prevStage, options)
     , m_prcFile(options.getOption("prc_filename").getValue<std::string>())
     , m_outputFormat(OUTPUT_FORMAT_PDF)
-    , m_colorScale(COLOR_SCALE_NONE)
+    , m_colorScheme(COLOR_SCHEME_SOLID)
+    , m_contrastStretch(CONTRAST_STRETCH_LINEAR)
 {
     return;
 }
@@ -95,17 +102,34 @@ void Writer::initialize()
         throw prc_driver_error("Unrecognized output format");
     }
 
-    std::string color_scale = getOptions().getValueOrDefault<std::string>("color_scale", "none");
+    std::string color_scheme = getOptions().getValueOrDefault<std::string>("color_scheme", "solid");
+    std::cout << color_scheme << " scheme\n";
 
-    if (boost::iequals(color_scale, "none"))
-        m_colorScale = COLOR_SCALE_NONE;
-    else if (boost::iequals(color_scale, "auto"))
-        m_colorScale = COLOR_SCALE_AUTO;
+    if (boost::iequals(color_scheme, "solid"))
+        m_colorScheme = COLOR_SCHEME_SOLID;
+    else if (boost::iequals(color_scheme, "oranges"))
+        m_colorScheme = COLOR_SCHEME_ORANGES;
+    else if (boost::iequals(color_scheme, "blue_green"))
+        m_colorScheme = COLOR_SCHEME_BLUE_GREEN;
     else
     {
         std::ostringstream oss;
-        oss << "Unrecognized color scale " << color_scale;
-        throw prc_driver_error("Unrecognized color scale");
+        oss << "Unrecognized color scheme " << color_scheme;
+        throw prc_driver_error("Unrecognized color scheme");
+    }
+
+    std::string contrast_stretch = getOptions().getValueOrDefault<std::string>("contrast_stretch", "linear");
+    std::cout << contrast_stretch << " stretch\n";
+
+    if (boost::iequals(contrast_stretch, "linear"))
+        m_contrastStretch = CONTRAST_STRETCH_LINEAR;
+    else if (boost::iequals(contrast_stretch, "sqrt"))
+        m_contrastStretch = CONTRAST_STRETCH_SQRT;
+    else
+    {
+        std::ostringstream oss;
+        oss << "Unrecognized contrast stretch " << contrast_stretch;
+        throw prc_driver_error("Unrecognized contrast stretch");
     }
 
     m_fov = static_cast<HPDF_REAL>(getOptions().getValueOrDefault<double>("fov", 30.0f));
@@ -129,7 +153,8 @@ Options Writer::getDefaultOptions()
     Option prc_filename("prc_filename", "", "Filename to write PRC file to");
     Option pdf_filename("pdf_filename", "", "Filename to write PDF file to");
     Option output_format("output_format", "", "PRC or PDF");
-    Option color_scale("color_scale", "", "None or auto");
+    Option color_scheme("color_scheme", "", "Solid, oranges, or blue-green");
+    Option contrast_stretch("contrast_stretch", "", "Linear or sqrt");
     Option fov("fov", "", "Field of View");
     Option coox("coox", "", "Camera coox");
     Option cooy("cooy", "", "Camera cooy");
@@ -143,7 +168,8 @@ Options Writer::getDefaultOptions()
     options.add(prc_filename);
     options.add(pdf_filename);
     options.add(output_format);
-    options.add(color_scale);
+    options.add(color_scheme);
+    options.add(contrast_stretch);
     options.add(fov);
     options.add(coox);
     options.add(cooy);
@@ -268,7 +294,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
     pdal::Dimension const& dimY = schema.getDimension("Y");
     pdal::Dimension const& dimZ = schema.getDimension("Z");
 
-    if (m_colorScale == COLOR_SCALE_AUTO)
+    if ((m_colorScheme == COLOR_SCHEME_ORANGES) || (m_colorScheme == COLOR_SCHEME_BLUE_GREEN))
     {
         double **p0, **p1, **p2, **p3, **p4, **p5, **p6, **p7, **p8;
         p0 = (double**) malloc(data.getNumPoints()*sizeof(double*));
@@ -297,29 +323,36 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
         double yd(0.0);
         double zd(0.0);
 
-        RGBAColour c8(247.0/255.0, 252.0/255.0, 253.0/255.0);
-        RGBAColour  c7(229.0/255.0, 245.0/255.0, 249.0/255.0);
-        RGBAColour  c6(204.0/255.0, 236.0/255.0, 230.0/255.0);
-        RGBAColour  c5(153.0/255.0, 216.0/255.0, 201.0/255.0);
-        RGBAColour  c4(102.0/255.0, 194.0/255.0, 164.0/255.0);
-        RGBAColour  c3(65.0/255.0, 174.0/255.0, 118.0/255.0);
-        RGBAColour  c2(35.0/255.0, 139.0/255.0,  69.0/255.0);
-        RGBAColour  c1(0.0, 109.0/255.0,  44.0/255.0);
-        RGBAColour  c0(0.0,  68.0/255.0,  27.0/255.0);
+        RGBAColour c0, c1, c2, c3, c4, c5, c6, c7, c8;
 
-// RGBAColour          c8(255.0/255.0, 245.0/255.0, 235.0/255.0);
-// RGBAColour          c7(254.0/255.0, 230.0/255.0, 206.0/255.0);
-// RGBAColour          c6(253.0/255.0, 208.0/255.0, 162.0/255.0);
-// RGBAColour          c5(253.0/255.0, 174.0/255.0, 107.0/255.0);
-// RGBAColour          c4(253.0/255.0, 141.0/255.0,  60.0/255.0);
-// RGBAColour          c3(241.0/255.0, 105.0/255.0,  19.0/255.0);
-// RGBAColour          c2(217.0/255.0,  72.0/255.0,   1.0/255.0);
-// RGBAColour          c1(166.0/255.0,  54.0/255.0,   3.0/255.0);
-// RGBAColour          c0(127.0/255.0,  39.0/255.0,   4.0/255.0);
+        if (m_colorScheme == COLOR_SCHEME_BLUE_GREEN)
+        {
+            c8.Set(247.0/255.0, 252.0/255.0, 253.0/255.0);
+            c7.Set(229.0/255.0, 245.0/255.0, 249.0/255.0);
+            c6.Set(204.0/255.0, 236.0/255.0, 230.0/255.0);
+            c5.Set(153.0/255.0, 216.0/255.0, 201.0/255.0);
+            c4.Set(102.0/255.0, 194.0/255.0, 164.0/255.0);
+            c3.Set(65.0/255.0, 174.0/255.0, 118.0/255.0);
+            c2.Set(35.0/255.0, 139.0/255.0,  69.0/255.0);
+            c1.Set(0.0, 109.0/255.0,  44.0/255.0);
+            c0.Set(0.0,  68.0/255.0,  27.0/255.0);
+        }
+        else if (m_colorScheme == COLOR_SCHEME_ORANGES)
+        {
+            c8.Set(255.0/255.0, 245.0/255.0, 235.0/255.0);
+            c7.Set(254.0/255.0, 230.0/255.0, 206.0/255.0);
+            c6.Set(253.0/255.0, 208.0/255.0, 162.0/255.0);
+            c5.Set(253.0/255.0, 174.0/255.0, 107.0/255.0);
+            c4.Set(253.0/255.0, 141.0/255.0,  60.0/255.0);
+            c3.Set(241.0/255.0, 105.0/255.0,  19.0/255.0);
+            c2.Set(217.0/255.0,  72.0/255.0,   1.0/255.0);
+            c1.Set(166.0/255.0,  54.0/255.0,   3.0/255.0);
+            c0.Set(127.0/255.0,  39.0/255.0,   4.0/255.0);
+        }
 
         double range, step, t0, t1, t2, t3, t4, t5, t6, t7;
 
-        if (0)
+        if (m_contrastStretch == CONTRAST_STRETCH_SQRT)
         {
             range = std::sqrt(m_bounds.getMaximum(2)) - std::sqrt(m_bounds.getMinimum(2));
             step = range / 9;
@@ -356,7 +389,7 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
             t6 = m_bounds.getMinimum(2) + twoper + 6 * step;
             t7 = m_bounds.getMinimum(2) + twoper + 7 * step;
         }
-        else
+        else if (m_contrastStretch == CONTRAST_STRETCH_LINEAR)
         {
             range = m_bounds.getMaximum(2) - m_bounds.getMinimum(2);
             step = range / 9;
