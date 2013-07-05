@@ -42,6 +42,8 @@
 MAKE_WRITER_CREATOR(prcWriter, pdal::drivers::prc::Writer)
 CREATE_WRITER_PLUGIN(prc, pdal::drivers::prc::Writer)
 
+SET_PLUGIN_VERSION(prc)
+
 enum OUTPUT_FORMAT
 {
     OUTPUT_FORMAT_PDF,
