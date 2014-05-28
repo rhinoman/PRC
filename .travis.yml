@@ -1,0 +1,18 @@
+# .travis.yml
+# Configure Travis CI service for http://github.com/PDAL/PRC
+
+language: cpp
+
+compiler:
+  - g++
+
+before_install: ./scripts/ci/before_install.sh
+
+script: ./scripts/ci/script.sh
+
+notifications:
+  on_success: always
+  on_failure: always
+  email:
+    recipients:
+      - jadam@radiantblue.com
