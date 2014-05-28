@@ -28,7 +28,7 @@ cd libgeotiff-1.4.0
 ./configure --prefix=/usr && make && sudo make install
 cd $TRAVIS_BUILD_DIR
 # check out and build PDAL
-git clone https://github.com/PDAL/PDAL.git
+git clone https://github.com/PDAL/PDAL.git .
 cd PDAL
 mkdir -p build 
 cd build
