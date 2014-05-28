@@ -241,7 +241,7 @@ void Writer::writeEnd(boost::uint64_t /*actualNumPointsWritten*/)
         view = HPDF_Create3DView(u3d->mmgr, "DefaultView");
         if (!view)
         {
-            printf("error: cannot create view\n");
+            printf("error: cannot create view \n");
             return;
         }
 
