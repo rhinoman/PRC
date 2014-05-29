@@ -10,6 +10,7 @@ sudo add-apt-repository ppa:boost-latest/ppa -y
 sudo apt-get update -qq
 sudo apt-get install \
     cmake \
+    automake \ 
     libflann-dev \
     libgdal-dev \
     libgeos-dev \
@@ -46,8 +47,7 @@ git clone https://github.com/libharu/libharu.git
 cd libharu
 mkdir -p _libharu_build || exit 1
 cd _libharu_build || exit 1
-./buildconf.sh
-./configure && make && sudo make install
+./buildconf.sh && ./configure && make && sudo make install
 cd $TRAVIS_BUILD_DIR
 
 gcc --version
