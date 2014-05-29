@@ -30,8 +30,8 @@ cd $TRAVIS_BUILD_DIR
 # check out and build PDAL
 git clone https://github.com/PDAL/PDAL.git 
 cd PDAL
-mkdir -p build 
-cd build
+mkdir -p _pdal_build || exit 1
+cd _pdal_build || exit 1
 cmake -G "Unix Makefiles" \
   -DWITH_GDAL=ON \
   -DWITH_LIBXML2=ON \
