@@ -46,7 +46,8 @@ git clone https://github.com/libharu/libharu.git
 cd libharu
 mkdir -p _libharu_build || exit 1
 cd _libharu_build || exit 1
-./configure --prefix=/usr && make && sudo make install
+./buildconf.sh
+./configure && make && sudo make install
 cd $TRAVIS_BUILD_DIR
 
 gcc --version
