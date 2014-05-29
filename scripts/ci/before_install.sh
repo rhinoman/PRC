@@ -41,6 +41,13 @@ cmake -G "Unix Makefiles" \
 
 make && sudo make install
 cd $TRAVIVS_BUILD_DIR
+#check out and build libharu
+git clone https://github.com/libharu/libharu.git
+cd libharu
+mkdir -p _libharu_build || exit 1
+cd _libharu_build || exit 1
+./configure --prefix=/usr && make && sudo make install
+cd $TRAVIS_BUILD_DIR
 
 gcc --version
 clang --version
