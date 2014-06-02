@@ -22,7 +22,8 @@ sudo apt-get install \
     python-numpy \
     boost1.55
 
-sudo aptitude -y install libgdal-dev
+sudo apt-get install gdal-bin --version 1.9
+sudo apt-get install libgdal-dev --version 1.9
 # install libgeotiff from sources
 wget http://download.osgeo.org/geotiff/libgeotiff/libgeotiff-1.4.0.tar.gz
 tar -xzf libgeotiff-1.4.0.tar.gz
