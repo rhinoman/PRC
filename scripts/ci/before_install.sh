@@ -9,6 +9,7 @@ sudo add-apt-repository ppa:ubuntugis/ppa -y
 sudo add-apt-repository ppa:boost-latest/ppa -y
 sudo apt-get update -qq
 sudo apt-get install \
+    aptitude \
     automake \
     cmake \
     libflann-dev \
