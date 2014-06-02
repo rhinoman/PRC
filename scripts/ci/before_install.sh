@@ -28,6 +28,15 @@ tar -xzf libgeotiff-1.4.0.tar.gz
 cd libgeotiff-1.4.0
 ./configure --prefix=/usr && make && sudo make install
 cd $TRAVIS_BUILD_DIR
+#check out and build libharu
+git clone https://github.com/libharu/libharu.git
+cd libharu
+mkdir -p _libharu_build || exit 1
+cd _libharu_build || exit 1
+export HPDF_INCLUDE_DIR=/usr/local/include
+export HPDF_LIBRARY=/usr/local/lib
+./buildconf.sh && ./configure && make && sudo make install
+cd $TRAVIS_BUILD_DIR
 # check out and build PDAL
 git clone https://github.com/PDAL/PDAL.git 
 cd PDAL
@@ -39,16 +48,8 @@ cmake -G "Unix Makefiles" \
   -DWITH_PGPOINTCLOUD=ON \
   -DPDAL_EMBED_BOOST=OFF \
   ..
-
 make && sudo make install
 cd $TRAVIVS_BUILD_DIR
-#check out and build libharu
-git clone https://github.com/libharu/libharu.git
-cd libharu
-mkdir -p _libharu_build || exit 1
-cd _libharu_build || exit 1
-./buildconf.sh && ./configure && make && sudo make install
-cd $TRAVIS_BUILD_DIR
 
 gcc --version
 clang --version
