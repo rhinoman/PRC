@@ -12,7 +12,8 @@ sudo apt-get install \
     automake \
     cmake \
     libflann-dev \
-    libgdal-dev \
+    gdal-bin --version 1.10 \
+    libgdal-dev --version 1.10 \
     libgeos-dev \
     libgeos++-dev \
     libpq-dev \
