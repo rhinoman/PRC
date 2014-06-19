@@ -38,6 +38,7 @@
 #include <pdal/StageFactory.hpp>
 
 #include <prc/oPRCFile.hpp>
+#include <prc/ColorQuantizer.hpp>
 
 MAKE_WRITER_CREATOR(prcWriter, pdal::drivers::prc::Writer)
 CREATE_WRITER_PLUGIN(prc, pdal::drivers::prc::Writer)
@@ -298,8 +299,10 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
 
     if ((m_colorScheme == COLOR_SCHEME_ORANGES) || (m_colorScheme == COLOR_SCHEME_BLUE_GREEN))
     {
+        //TODO: DEBUG CODE REMOVE!!!
+        std::cout << "[JA] Writer.cpp - At line 301\n"; 
         double **p0, **p1, **p2, **p3, **p4, **p5, **p6, **p7, **p8;
-        p0 = (double**) malloc(data.getNumPoints()*sizeof(double*));
+        /*p0 = (double**) malloc(data.getNumPoints()*sizeof(double*));
         p1 = (double**) malloc(data.getNumPoints()*sizeof(double*));
         p2 = (double**) malloc(data.getNumPoints()*sizeof(double*));
         p3 = (double**) malloc(data.getNumPoints()*sizeof(double*));
@@ -307,18 +310,27 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
         p5 = (double**) malloc(data.getNumPoints()*sizeof(double*));
         p6 = (double**) malloc(data.getNumPoints()*sizeof(double*));
         p7 = (double**) malloc(data.getNumPoints()*sizeof(double*));
-        p8 = (double**) malloc(data.getNumPoints()*sizeof(double*));
+        p8 = (double**) malloc(data.getNumPoints()*sizeof(double*));*/
+	p0 = new double*;
+        p1 = new double*;
+        p2 = new double*;
+        p3 = new double*;
+        p4 = new double*;
+        p5 = new double*;
+        p6 = new double*;
+        p7 = new double*;
+        p8 = new double*;
         for (boost::uint32_t i = 0; i < data.getNumPoints(); ++i)
         {
-            p0[i] = (double*) malloc(3*sizeof(double));
-            p1[i] = (double*) malloc(3*sizeof(double));
-            p2[i] = (double*) malloc(3*sizeof(double));
-            p3[i] = (double*) malloc(3*sizeof(double));
-            p4[i] = (double*) malloc(3*sizeof(double));
-            p5[i] = (double*) malloc(3*sizeof(double));
-            p6[i] = (double*) malloc(3*sizeof(double));
-            p7[i] = (double*) malloc(3*sizeof(double));
-            p8[i] = (double*) malloc(3*sizeof(double));
+            p0[i] = new double;
+            p1[i] = new double; 
+            p2[i] = new double;
+            p3[i] = new double;
+            p4[i] = new double;
+            p5[i] = new double;
+            p6[i] = new double;
+            p7[i] = new double;
+            p8[i] = new double;
         }
 
         double xd(0.0);
@@ -600,28 +612,30 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
 
         for (boost::uint32_t i = 0; i < data.getNumPoints(); ++i)
         {
-            free(p0[i]);
-            free(p1[i]);
-            free(p2[i]);
-            free(p3[i]);
-            free(p4[i]);
-            free(p5[i]);
-            free(p6[i]);
-            free(p7[i]);
-            free(p8[i]);
+            delete(p0[i]);
+            delete(p1[i]);
+            delete(p2[i]);
+            delete(p3[i]);
+            delete(p4[i]);
+            delete(p5[i]);
+            delete(p6[i]);
+            delete(p7[i]);
+            delete(p8[i]);
         }
-        free(p0);
-        free(p1);
-        free(p2);
-        free(p3);
-        free(p4);
-        free(p5);
-        free(p6);
-        free(p7);
-        free(p8);
+        delete(p0);
+        delete(p1);
+        delete(p2);
+        delete(p3);
+        delete(p4);
+        delete(p5);
+        delete(p6);
+        delete(p7);
+        delete(p8);
     }
     else
     {
+        //TODO: DEBUG CODE REMOVE!!!
+        std::cout << "[JA] Writer.cpp - At line 635\n"; 
         boost::optional<pdal::Dimension const&> dimR = schema.getDimensionOptional("Red");
         boost::optional<pdal::Dimension const&> dimG = schema.getDimensionOptional("Green");
         boost::optional<pdal::Dimension const&> dimB = schema.getDimensionOptional("Blue");
@@ -632,10 +646,16 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
 
         if (bHaveColor)
         {
+	    //TODO: DEBUG CODE REMOVE!!!!
+	    std::cout << "[JA] Writer.cpp - At line 646\n"; 
+	    std::cout << "[JA] Number of Points: " << data.getNumPoints() << "\n";
             double **points;
-            points = (double**) malloc(sizeof(double*));
+	    points = new double*; 
+	    uint16_t histogram[INT16_MAX] = {0};
+            //points = (double**) malloc(sizeof(double*));
             {
-                points[0] = (double*) malloc(3*sizeof(double));
+                //points[0] = (double*) malloc(3*sizeof(double));
+                points[0] = new double;
             }
 
             double xd(0.0);
@@ -648,37 +668,87 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
                 boost::int32_t y = data.getField<boost::int32_t>(dimY, i);
                 boost::int32_t z = data.getField<boost::int32_t>(dimZ, i);
 
-                double r = static_cast<double>(data.getField<boost::uint16_t>(*dimR, i))/255.0;
-                double g = static_cast<double>(data.getField<boost::uint16_t>(*dimG, i))/255.0;
-                double b = static_cast<double>(data.getField<boost::uint16_t>(*dimB, i))/255.0;
-
+                uint16_t r = (uint16_t)((static_cast<double>(data.getField<boost::uint16_t>(*dimR, i)*31)/255.0) + 0.5);
+                uint16_t g = (uint16_t)((static_cast<double>(data.getField<boost::uint16_t>(*dimG, i)*31)/255.0) + 0.5);
+                uint16_t b = (uint16_t)((static_cast<double>(data.getField<boost::uint16_t>(*dimB, i)*31)/255.0) + 0.5);
+                //double g = static_cast<double>(data.getField<boost::uint16_t>(*dimG, i))/255.0;
+                //double b = static_cast<double>(data.getField<boost::uint16_t>(*dimB, i))/255.0;
+		
+// 		uint32_t color = 0;
+// 		uint32_t red_comp = (uint32_t)(r+0.5);
+// 		uint32_t green_comp = (uint32_t)(g+0.5);
+// 		uint32_t blue_comp = (uint32_t)(b+0.5);
+ 		uint16_t color = RGB(r,g,b);
+		//TODO: Possible off-by-one
+ 		histogram[color]++;
+		
                 xd = dimX.applyScaling<boost::int32_t>(x) - cx;
                 yd = dimY.applyScaling<boost::int32_t>(y) - cy;
                 zd = dimZ.applyScaling<boost::int32_t>(z) - cz;
 
-                if (i % 10000 == 0) printf("point %f %f %f %f %f %f\n", xd, yd, zd, r, g, b);
+//                if (i % 10000 == 0) printf("point %f %f %f %f %f %f\n", xd, yd, zd, r, g, b);
 
-                points[0][0] = xd;
-                points[0][1] = yd;
-                points[0][2] = zd;
-
-                m_prcFile.addPoints(1, const_cast<const double**>(points), RGBAColour(r,g,b,1.0), 5.0);
+//                 points[0][0] = xd;
+//                 points[0][1] = yd;
+//                 points[0][2] = zd;
+// 
+//                 m_prcFile.addPoints(1, const_cast<const double**>(points), RGBAColour(r,g,b,1.0), 5.0);
 
                 numPoints++;
             }
+            
+            byte colMap[256][3];
+ 	    ColorQuantizer *colorQuantizer = new ColorQuantizer();
+ 	    colorQuantizer->medianCut(histogram,colMap,256);
+            for (boost::uint32_t i=0; i< data.getNumPoints(); ++i)
+ 	    {
+ 	        boost::int32_t x = data.getField<boost::int32_t>(dimX, i);
+                boost::int32_t y = data.getField<boost::int32_t>(dimY, i);
+                boost::int32_t z = data.getField<boost::int32_t>(dimZ, i);
+                xd = dimX.applyScaling<boost::int32_t>(x) - cx;
+                yd = dimY.applyScaling<boost::int32_t>(y) - cy;
+                zd = dimZ.applyScaling<boost::int32_t>(z) - cz;
+		
+                //if (i % 10000 == 0) printf("point %f %f %f %f %f %f\n", xd, yd, zd, r, g, b);
+		points[0][0] = xd;
+		points[0][1] = yd;
+		points[0][2] = zd;
+// 		double r = static_cast<double>(data.getField<boost::uint16_t>(*dimR, i))/255.0;
+// 		double g = static_cast<double>(data.getField<boost::uint16_t>(*dimG, i))/255.0;
+// 		double b = static_cast<double>(data.getField<boost::uint16_t>(*dimB, i))/255.0;
+		uint16_t r = (uint16_t)((static_cast<double>(data.getField<boost::uint16_t>(*dimR, i)*31)/255.0) + 0.5);
+		uint16_t g = (uint16_t)((static_cast<double>(data.getField<boost::uint16_t>(*dimG, i)*31)/255.0) + 0.5);
+		uint16_t b = (uint16_t)((static_cast<double>(data.getField<boost::uint16_t>(*dimB, i)*31)/255.0) + 0.5);
+		
+		uint16_t color = RGB(r,g,b);
+		
+		uint16_t colorIndex = histogram[color];
+		double theRed = static_cast<double>((int)(colMap[colorIndex][0]));
+		double theGreen = static_cast<double>((int)(colMap[colorIndex][1]));
+		double theBlue = static_cast<double>((int)(colMap[colorIndex][2]));
+		
+                m_prcFile.addPoints(1, const_cast<const double**>(points), RGBAColour(theRed,theGreen,theBlue,1.0), 5.0);
+	    }
 
             {
-                free(points[0]);
+                //free(points[0]);
+                delete(points[0]);
             }
-            free(points);
+            //free(points);
+            delete(points);
+	    delete(colorQuantizer);
         }
         else
         {
+	    //TODO: DEBUG CODE REMOVE!!!!
+	    std::cout << "[JA] Writer.cpp - At line 693\n"; 
             double **points;
-            points = (double**) malloc(data.getNumPoints()*sizeof(double*));
+            //points = (double**) malloc(data.getNumPoints()*sizeof(double*));
+	    points = new double*;
             for (boost::uint32_t i = 0; i < data.getNumPoints(); ++i)
             {
-                points[i] = (double*) malloc(3*sizeof(double));
+                //points[i] = (double*) malloc(3*sizeof(double));
+                points[i] = new double;
             }
 
             double xd(0.0);
@@ -734,9 +804,9 @@ boost::uint32_t Writer::writeBuffer(const PointBuffer& data)
 
             for (boost::uint32_t i = 0; i < data.getNumPoints(); ++i)
             {
-                free(points[i]);
+                delete(points[i]);
             }
-            free(points);
+            delete(points);
         }
     }
 

@@ -13,3 +13,7 @@ if [[ -f /sys/devices/system/cpu/online ]]; then
 fi
 #NUMTHREADS=1 disable MP
 export NUMTHREADS
+HPDF_INCLUDE_DIR=/usr/local/include
+HPDF_LIBRARY=/usr/local/lib
+export HPDF_INCLUDE_DIR
+export HPDF_LIBRARY
